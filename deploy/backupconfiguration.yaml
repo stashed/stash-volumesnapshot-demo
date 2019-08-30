@@ -10,7 +10,9 @@ spec:
     name: db-volume-snapshot
     params:
     - name: shards
-      value: "my-data-0,my-data-1,my-data-2"
+      value: "my-data-0,my-data-1,my-data-2" # statefulsets name
+    - name: volumeSnapshotClass
+      value: default-volumesnpashot-class
   runtimeSettings:
     pod:
       serviceAccountName: stash-volumesnapshot-demo

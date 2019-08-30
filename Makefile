@@ -16,7 +16,7 @@
 SHELL=/bin/bash -o pipefail
 
 # The binary to build (just the basename).
-BIN      := stash-postgres
+BIN      := stash-volumesnapshot-demo
 COMPRESS ?= no
 
 # Where to push the docker image.
@@ -42,10 +42,6 @@ else
 	endif
 endif
 
-RESTIC_VER       := 0.8.3
-# also update in restic wrapper library
-NEW_RESTIC_VER   := 0.9.5
-
 ###
 ### These variables should not need tweaking.
 ###
@@ -59,8 +55,8 @@ BIN_PLATFORMS    := $(DOCKER_PLATFORMS)
 OS   := $(if $(GOOS),$(GOOS),$(shell go env GOOS))
 ARCH := $(if $(GOARCH),$(GOARCH),$(shell go env GOARCH))
 
-BASEIMAGE_PROD   ?= postgres:11.2-alpine
-BASEIMAGE_DBG    ?= postgres:11.2
+BASEIMAGE_PROD   ?= gcr.io/distroless/static
+BASEIMAGE_DBG    ?= debian:stretch
 
 IMAGE            := $(REGISTRY)/$(BIN)
 VERSION_PROD     := $(VERSION)
@@ -212,8 +208,6 @@ bin/.container-$(DOTFILE_IMAGE)-%: bin/$(OS)_$(ARCH)/$(BIN) $(DOCKERFILE_%)
 	    -e 's|{ARG_ARCH}|$(ARCH)|g'                 \
 	    -e 's|{ARG_OS}|$(OS)|g'                     \
 	    -e 's|{ARG_FROM}|$(BASEIMAGE_$*)|g'         \
-	    -e 's|{RESTIC_VER}|$(RESTIC_VER)|g'         \
-	    -e 's|{NEW_RESTIC_VER}|$(NEW_RESTIC_VER)|g' \
 	    $(DOCKERFILE_$*) > bin/.dockerfile-$*-$(OS)_$(ARCH)
 	@DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --platform $(OS)/$(ARCH) --load --pull -t $(IMAGE):$(TAG_$*) -f bin/.dockerfile-$*-$(OS)_$(ARCH) .
 	@docker images -q $(IMAGE):$(TAG_$*) > $@

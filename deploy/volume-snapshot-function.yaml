@@ -7,5 +7,6 @@ spec:
     - backup
     - --namespace=${NAMESPACE:=default}
     - --shards=${shards}
+    - --snapshot-class=${volumeSnapshotClass}
     - --output-dir=${outputDir:=}
   image: appscodeci/stash-volumesnapshot-demo:latest

@@ -17,8 +17,8 @@ import (
 func NewRootCmd() *cobra.Command {
 	var rootCmd = &cobra.Command{
 		Use:               "stash-volumesnasphot-demo",
-		Short:             `PostgreSQL backup & restore plugin for Stash by AppsCode`,
-		Long:              `PostgreSQL backup & restore plugin for Stash by AppsCode. For more information, visit here: https://appscode.com/products/stash`,
+		Short:             `VolumeSnapshot plugin for Stash by AppsCode`,
+		Long:              `VolumeSnapshot plugin for Stash by AppsCode. For more information, visit here: https://appscode.com/products/stash`,
 		DisableAutoGenTag: true,
 		PersistentPreRunE: func(c *cobra.Command, args []string) error {
 			flags.DumpAll(c.Flags())
