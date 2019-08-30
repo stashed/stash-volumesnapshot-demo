@@ -5,6 +5,7 @@ metadata:
   namespace: demo
 spec:
   schedule: "*/2 * * * *"
+  driver: VolumeSnapshotter
   task:
     name: db-volume-snapshot
     params:
