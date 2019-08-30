@@ -1,0 +1,18 @@
+apiVersion: stash.appscode.com/v1beta1
+kind: BackupConfiguration
+metadata:
+  name: my-demo-db-backup
+  namespace: demo
+spec:
+  schedule: "*/2 * * * *"
+  task:
+    name: db-volume-snapshot
+    params:
+    - name: shards
+      value: "my-data-0,my-data-1,my-data-2"
+  runtimeSettings:
+    pod:
+      serviceAccountName: stash-volumesnapshot-demo
+  retentionPolicy: # not implemented for VolumeSnapshot yet
+    keepLast: 5
+    prune: true
