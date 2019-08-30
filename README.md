@@ -81,3 +81,11 @@ curl -fsSL https://github.com/stashed/installer/raw/v0.9.0-rc.0/deploy/stash.sh 
 ```
 
 ## Backup
+
+- Create Storage Class using newly deployed CSI driver.
+- Create VolumeSnapshotClass using same CSI driver.
+- Create Function, Task, RBAC.
+- Deploy StatefulSets. StatefulSets must use same storage class as VolumeSnapshotClass
+- Create `BackupConfiguration`. Provide StatefulSet's name as shards params in `spec.Task.params` section.
+
+**Make sure image field has been updated in Function spec to point the image with latest change.**
