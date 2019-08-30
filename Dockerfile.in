@@ -1,21 +1,4 @@
-FROM debian:stretch
-
-ENV DEBIAN_FRONTEND noninteractive
-ENV DEBCONF_NONINTERACTIVE_SEEN true
-
-RUN set -x \
-  && apt-get update \
-  && apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl bzip2
-
-
 FROM {ARG_FROM}
-
-RUN set -x \
-  && apk add --update --no-cache ca-certificates tzdata \
-  && echo 'Etc/UTC' > /etc/timezone
-
-ENV TZ     :/etc/localtime
-ENV LANG   en_US.utf8
 
 COPY bin/{ARG_OS}_{ARG_ARCH}/{ARG_BIN} /{ARG_BIN}
 

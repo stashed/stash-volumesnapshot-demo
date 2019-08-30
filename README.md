@@ -1,35 +1,83 @@
-[![Go Report Card](https://goreportcard.com/badge/stash.appscode.dev/postgres)](https://goreportcard.com/report/stash.appscode.dev/postgres)
-[![Build Status](https://travis-ci.org/stashed/postgres.svg?branch=master)](https://travis-ci.org/stashed/postgres)
-[![Docker Pulls](https://img.shields.io/docker/pulls/stashed/stash-postgres.svg)](https://hub.docker.com/r/stashed/stash-postgres/)
-[![Slack](https://slack.appscode.com/badge.svg)](https://slack.appscode.com)
-[![Twitter](https://img.shields.io/twitter/follow/appscodehq.svg?style=social&logo=twitter&label=Follow)](https://twitter.com/intent/follow?screen_name=AppsCodeHQ)
+# How to Run
 
-# Postgres
+## Create Alpha Cluster in GKE
 
-Postgres backup and restore plugin for [Stash by AppsCode](https://appscode.com/products/stash).
+- Install Kops: [kubernetes/kops](https://github.com/kubernetes/kops)
+- Make sure `gcloud` is loged in into GCS account.
+    - `gcloud login`
+- Configure default credentials:
+    ```console
+    gcloud auth application-default login
+    ```
+- Create Cluster:
+    ```console
+    export KOPS_STATE_STORE=gs://appscode-qa/
+    export PROJECT=ackube
+    export KOPS_FEATURE_FLAGS=AlphaAllowGCE
+    
+    # create cluster configuration
+    kops create cluster stash.k8s.local  \
+    --zones us-central1-f                \
+    --state ${KOPS_STATE_STORE}          \
+    --project=${PROJECT}                 \
+    --node-count=2                       \
+    --kubernetes-version=v1.14.6
 
-## Install
+    # crate cluster
+    kops update cluster stash.k8s.local --yes
+    ```
 
-Install PostgreSQL 11.2 backup or restore plugin for Stash as below.
+Now, wait for few minutes to cluster to be ready.
+
+- SSH into master node and add `--feature-gates=VolumeSnapshotDataSource=true` flag:
+  ```console
+  # run as root user
+  sudo su
+
+  # edit kube-apiserver and add: "--feature-gates=VolumeSnapshotDataSource=true" flag
+  vi /etc/kubernetes/manifests/kube-apiserver.manifest
+  ```
+
+## Install GCP CSI Driver (Alpha)
+
+- Clone this repo: [kubernetes-sigs/gcp-compute-persistent-disk-csi-driver](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver)
+- Checkout to `v0.5.1` release tag:
+    ```console
+    git checkout v0.5.1
+    ```
+
+- Setup Necessary Roles:
+    ```
+    export PROJECT=ackube
+    export GCE_PD_SA_NAME=stash-volumesnapshot-demo
+    export GCE_PD_SA_DIR=/home/emruz/dev/cred/gcs/
+    
+    # setup project
+    ./deploy/setup-project.sh
+    ```
+
+- Deploy CSI driver
+    ```console
+    export GCE_PD_SA_DIR=/home/emruz/dev/cred/gcs
+    export GCE_PD_DRIVER_VERSION=alpha
+    ./deploy/kubernetes/deploy-driver.sh
+    ```
+
+- Verify that driver is running. You should see the flowing 3 pods are running
+
+    ```console
+    $ kubectl get pod | grep csi-gce-pd
+    csi-gce-pd-controller-0   4/4     Running   1          71s
+    csi-gce-pd-node-s5mvj     2/2     Running   0          70s
+    csi-gce-pd-node-wgsmj     2/2     Running   0          70s
+    ```
+
+## Install Stash
 
 ```console
-helm repo add appscode https://charts.appscode.com/stable/
-helm repo update
-helm install appscode/stash-postgres --name=stash-postgres-11.2 --version=11.2
+export STASH_IMAGE_TAG=support-vs-ft-model_linux_amd64
+
+curl -fsSL https://github.com/stashed/installer/raw/v0.9.0-rc.0/deploy/stash.sh | bash -s -- --docker-registry=appscodeci
 ```
 
-To install catalog for all supported PostgreSQL versions, please visit [here](https://github.com/stashed/catalog).
-
-## Uninstall
-
-Uninstall PostgreSQL 11.2 backup or restore plugin for Stash as below.
-
-```console
-helm delete stash-postgres-11.2
-```
-
-## Support
-
-We use Slack for public discussions. To chit chat with us or the rest of the community, join us in the [AppsCode Slack team](https://appscode.slack.com/messages/C8NCX6N23/details/) channel `#stash`. To sign up, use our [Slack inviter](https://slack.appscode.com/).
-
-If you have found a bug with Stash or want to request for new features, please [file an issue](https://github.com/stashed/stash/issues/new).
+## Backup

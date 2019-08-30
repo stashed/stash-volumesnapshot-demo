@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: stash-volumesnasphot-demo
+  name: stash-volumesnapshot-demo
   labels:
     app: stash
 rules:
@@ -14,7 +14,7 @@ rules:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: stash-volumesnasphot-demo
+  name: stash-volumesnapshot-demo
   namespace: demo
   labels:
     app: stash
@@ -22,15 +22,15 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: stash-volumesnasphot-demo
+  name: stash-volumesnapshot-demo
   namespace: demo
   labels:
     app: stash
 roleRef:
   kind: ClusterRole
   apiGroup: rbac.authorization.k8s.io
-  name: stash-volumesnasphot-demo
+  name: stash-volumesnapshot-demo
 subjects:
 - kind: ServiceAccount
-  name: stash-volumesnasphot-demo
+  name: stash-volumesnapshot-demo
   namespace: demo
