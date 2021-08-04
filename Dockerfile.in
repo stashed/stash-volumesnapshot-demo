@@ -2,6 +2,5 @@ FROM {ARG_FROM}
 
 COPY bin/{ARG_OS}_{ARG_ARCH}/{ARG_BIN} /{ARG_BIN}
 
-USER nobody:nobody
 
 ENTRYPOINT ["/{ARG_BIN}"]
